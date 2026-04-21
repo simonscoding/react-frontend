@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "./css/ProductDetail.css";
+import { Link } from "react-router-dom";
+import "./css/ProductList.css";
 
-const ProductDetail = () => {
-  const { id } = useParams(); // this is the index from the URL
-  const [product, setProduct] = useState(null);
+const ProductList = () => {
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,51 +11,45 @@ const ProductDetail = () => {
     fetch("https://project-api-abgycnhvephdb0c8.canadacentral-01.azurewebsites.net/api/products")
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to fetch product");
+          throw new Error("Failed to fetch products");
         }
         return res.json();
       })
       .then((data) => {
-        const selectedProduct = data[id]; // use index from URL
-        setProduct(selectedProduct);
+        setProducts(data);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
-        setError("Could not load product");
+        setError("Could not load products");
         setLoading(false);
       });
-  }, [id]);
+  }, []);
 
-  if (loading) {
-    return <p style={{ textAlign: "center" }}>Loading product...</p>;
-  }
-
-  if (error) {
-    return <p style={{ textAlign: "center", color: "red" }}>{error}</p>;
-  }
-
-  if (!product) {
-    return <p style={{ textAlign: "center" }}>Product not found</p>;
-  }
+  if (loading) return <p style={{ textAlign: "center" }}>Loading products...</p>;
+  if (error) return <p style={{ textAlign: "center", color: "red" }}>{error}</p>;
 
   return (
-    <div className="product-detail">
-      <img
-        src={product.thumbnail}
-        alt={product.title}
-        className="product-image"
-      />
+    <div className="grid">
+      {products.map((product) => (
+        <div key={product.id} className="card">
+          <Link to={`/product/${product.id}`} className="link">
 
-      <h1>{product.title}</h1>
-      <p className="price">${product.price}</p>
-      <p className="description">{product.description}</p>
+            <img
+              src={product.thumbnail}
+              alt={product.title}
+              className="thumbnail"
+            />
 
-      <button className="add-to-cart">
-        Add to Cart
-      </button>
+            <h2 className="title">{product.title}</h2>
+
+            <p className="price">${product.price}</p>
+
+          </Link>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default ProductDetail;
+export default ProductList;
